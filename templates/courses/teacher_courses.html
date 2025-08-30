@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}My Courses (Teaching){% endblock %}
+{% block content %}
+<h1>My Courses (Teaching)</h1>
+
+<ul>
+  {% for c in courses %}
+    <li>
+    <a href="{% url 'course_detail' c.pk %}"><strong>{{c.title}}</strong></a>
+    — Students: {{c.student_count|default:0}}
+    · <a href="{% url 'course_chat' c.id %}">Chat</a>
+    </li>
+
+  {% empty %}
+    <li>You are not teaching any courses yet.</li>
+  {% endfor %}
+</ul>
+
+<p style="margin-top:1rem;">
+  <a href="{% url 'course_create' %}">Add a new course</a>
+</p>
+{% endblock %}

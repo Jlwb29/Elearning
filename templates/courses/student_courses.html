@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}My Courses{% endblock %}
+{% block content %}
+<h1>My Courses</h1>
+<ul>
+  {% for c in courses %}
+    <li>
+    <strong>{{c.title}}</strong>
+    {% if c.start_date %} ({{c.start_date}}{% if c.end_date %}-{{c.end_date}}{% endif %}){% endif %}
+    · <a href="{% url 'course_chat' c.id %}">Chat</a>
+    </li>
+
+  {% empty %}
+    <li>You haven't enrolled in any courses yet. <a href="{% url 'course_enroll' %}">Enroll now</a>.</li>
+  {% endfor %}
+</ul>
+<ul>
+  {% for c in courses %}
+    <li>
+      <a href="{% url 'course_detail' c.id %}">{{c.title}}</a>
+      <a href="{% url 'course_feedback' c.id %}?next={% url 'student_course_list' %}">
+      · <a href="{% url 'course_feedback' c.id %}">Leave / Edit feedback</a>
+    </li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

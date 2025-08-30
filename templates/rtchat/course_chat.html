@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{course.title}} — Chat{% endblock %}
+{% block content %}
+<h1>{{course.title}} — Chat</h1>
+
+<ul id="messages" style="list-style:none;padding:.5rem;max-height:40vh;overflow:auto;border:1px solid #ddd;">
+  {% for m in chat_messages %}
+    <li style="margin:.25rem 0;">
+      <strong>{{m.user.username}}</strong>
+      <small style="opacity:.7">· {{m.created_at|date:"Y-m-d H:i"}}</small><br>
+      {{m.text}}
+    </li>
+  {% empty %}
+    <li id="messages-empty"><em>No messages yet</em></li>
+  {% endfor %}
+</ul>
+
+{% if is_teacher %}
+  <form method="post" action="{% url 'course_chat_clear' course.id %}"
+        onsubmit="return confirm('Clear all messages for this course?');"
+        style="margin:.5rem 0;">
+    {% csrf_token %}
+    <button type="submit">Clear chat</button>
+  </form>
+{% endif %}
+
+<form id="chat-form" style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;">
+  {% csrf_token %}
+  <input id="chat-input" type="text" placeholder="Type a message…" required
+         style="flex:1;min-width:0;padding:.5rem;border:1px solid #ccc;border-radius:4px;">
+  <button type="submit">Send</button>
+</form>
+
+<script>
+(function () {
+  const isTeacher = {{ is_teacher|yesno:"true,false" }};
+  const courseId = {{ course.id }};
+  const scheme = location.protocol === "https:" ? "wss" : "ws";
+  const url = `${scheme}://${location.host}/ws/chat/course/${courseId}/`;
+  const list = document.getElementById("messages");
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("chat-input");
+  const socket = new WebSocket(url);
+
+  socket.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+
+    if (data.event === "material") 
+    {
+      const li = document.createElement("li");
+      li.className = "system";
+      const when = new Date(data.created_at).toLocaleString();
+      let line = `<em>New material: ${data.title} (in ${data.course})</em>`;
+      if (data.url) line += `— <a href="${data.url}" target="_blank" rel="noopener">Open link</a>`;
+      if (data.has_file) line += `— (file attached)`;
+      li.innerHTML = `${line} <small style="opacity:.7;">· ${when}</small>`;
+      list.appendChild(li);
+      list.scrollTop = list.scrollHeight;
+      return;
+    }
+
+    if (data.event === "chat_cleared") {
+      list.innerHTML = "";
+      const li = document.createElement("li");
+      li.className = "system";
+      const ms = Date.parse(data.created_at);
+      const when = Number.isFinite(ms) ? " · " + new Date(ms).toLocaleString() : "";
+      li.textContent = `Chat history cleared by ${data.by || "instructor"}${when}`;
+      list.appendChild(li);
+      list.scrollTop = list.scrollHeight;
+      return;
+    }
+
+    const empty = document.getElementById("messages-empty"); if (empty) empty.remove();
+    const li = document.createElement("li");
+    li.style.margin = ".25rem 0";
+    li.innerHTML = `<strong>${data.user}</strong> <small style="opacity:.7;">· ${new Date(data.created_at).toLocaleString()}</small><br>${data.text}`;
+    list.appendChild(li);
+    list.scrollTop = list.scrollHeight;
+  };
+
+  form.addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const msg = input.value.trim();
+    if (!msg || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ message: msg }));
+    input.value = "";
+    input.focus();
+  });
+})();
+</script>
+
+{% endblock %}

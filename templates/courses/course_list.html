@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<h1>Courses</h1>
+<p><a href="{% url 'course_create' %}">Add new course</a></p>
+<p><a href="{% url 'course_enroll' %}">Enroll in courses</a></p>
+
+<ul>
+  {% for c in courses %}
+    <li>
+      <strong>{{c.title}}</strong>
+      {% if c.start_date %} ({{c.start_date}}{% if c.end_date %}-{{c.end_date}}{% endif %}){% endif %}—by{{c.created_by.username}}
+    </li>
+  {% empty %}
+    <li>No courses yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

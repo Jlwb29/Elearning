@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+  <h1>
+    Welcome{%if user.is_authenticated%}, {{user.get_full_name|default:user.username}}{%endif%}!
+  </h1>
+
+  {%if user.is_authenticated%}
+    <p>Quick links:</p>
+    <ul>
+      <li><a href="{% url 'me' %}">My profile</a></li>
+      <li><a href="{% url 'course_list' %}">Courses</a></li>
+      <li><a href="{% url 'student_course_list' %}">My courses</a></li>
+      <li><a href="{% url 'course_enroll' %}">Enroll in courses</a></li>
+      {%if perms.courses.add_course%}
+        <li><a href="{%url 'course_create'%}">Add a course</a></li>
+        <li><a href="{%url 'teacher_course_list'%}">My teaching</a></li>
+      {% endif %}
+      <li><a href="{% url 'people_search' %}">Search people</a></li>
+    </ul>
+
+    <h3>Course shortcuts</h3>
+
+    <h4>Teaching</h4>
+    <ul>
+      {% for c in user.courses_created.all %}
+        <li>
+          {{c.title}} —
+          <a href="{% url 'course_home' c.id %}">Home</a> ·
+          <a href="{% url 'course_chat' c.id %}">Chat</a> ·
+          <a href="{% url 'course_roster' c.id %}">Roster</a>
+        </li>
+      {% empty %}
+        {% with teacher_enrs=user.enrollments.all %}
+          {% if teacher_enrs %}
+            {% for e in teacher_enrs %}
+              {% if e.role == "TEACHER" %}
+                <li>
+                  {{e.course.title}} —
+                  <a href="{% url 'course_home' e.course.id %}">Home</a> ·
+                  <a href="{% url 'course_chat' e.course.id %}">Chat</a> ·
+                  <a href="{% url 'course_roster' e.course.id %}">Roster</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <li>No teaching courses yet.</li>
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+    </ul>
+
+    <h4>Enrolled</h4>
+    <ul>
+      {% for e in user.enrollments.all %}
+        {% if e.role == "STUDENT" %}
+          <li>
+            {{e.course.title}} —
+            <a href="{% url 'course_home' e.course.id %}">Home</a> ·
+            <a href="{% url 'course_chat' e.course.id %}">Chat</a>
+          </li>
+        {% endif %}
+      {% empty %}
+        <li>No enrollments yet <a href="{% url 'course_enroll' %}">Enroll in courses</a>.</li>
+      {% endfor %}
+    </ul>
+
+  {% else %}
+    <p>Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">create an account</a>.</p>
+    <p>Or browse <a href="{% url 'course_list' %}">courses</a>.</p>
+  {% endif %}
+{% endblock %}

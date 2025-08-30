@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{course.title}} — Home{% endblock %}
+{% block content %}
+<h1>{{course.title}}</h1>
+
+<h2>Materials</h2>
+{% if is_teacher %}
+  <p><a href="{% url 'material_create' course.id %}">+ Add material</a></p>
+{% endif %}
+
+<ul>
+  {% for m in materials %}
+    <li style="margin:.4rem 0;">
+      <strong>{{m.title}}</strong>
+      <small style="opacity:.7;">· {{m.created_at|date:"Y-m-d H:i"}} by {{m.created_by.username}}</small><br>
+      {% if m.description %}<div>{{ m.description }}</div>{% endif %}
+      {% if m.file %}
+        <div>File: <a href="{{m.file.url}}" target="_blank" rel="noopener">{{m.file.name|cut:"materials/"}}</a></div>
+      {% endif %}
+      {% if m.url %}
+        <div>Link: <a href="{{m.url}}" target="_blank" rel="noopener">{{m.url}}</a></div>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li><em>No materials yet.</em></li>
+  {% endfor %}
+</ul>
+
+<p style="margin-top:1rem;">
+  <a href="{% url 'course_chat' course.id %}">Open course chat</a>
+</p>
+{% endblock %}

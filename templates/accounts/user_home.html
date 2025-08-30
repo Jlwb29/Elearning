@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }}{% endblock %}
+{% block content %}
+<h1>{{profile_user.get_full_name|default:profile_user.username}}</h1>
+
+{% if form %}
+  <form method="post" style="margin: .75rem 0;">
+    {% csrf_token %}
+    {{form.text}}
+    <button type="submit">Post</button>
+  </form>
+{% endif %}
+
+<h3>Status updates</h3>
+<ul style="list-style:none;padding:0">
+  {% for s in statuses %}
+    <li style="border-bottom:1px solid #eee;padding:.5rem 0">
+      <div>{{ s.text }}</div>
+      <small style="opacity:.7">{{s.created_at|date:"Y-m-d H:i"}}</small>
+    </li>
+  {% empty %}
+    <li><em>No updates yet.</em></li>
+  {% endfor %}
+</ul>
+
+{% if teaches or registered or upcoming %}
+  <h3>Courses</h3>
+  {% if teaches %}<p><strong>Teaching:</strong> {{teaches|length}}</p>{% endif %}
+  {% if registered %}<p><strong>Enrolled:</strong> {{registered|length}}</p>{% endif %}
+  {% if upcoming %}
+    <h4>Upcoming deadlines (30 days)</h4>
+    <ul>
+      {% for a in upcoming %}
+        <li>{{a.course.title}} — {{a.title}} (due {{a.due_date}})</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endif %}
+{% endblock %}

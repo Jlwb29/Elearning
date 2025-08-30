@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{course.title}} — {{editing|yesno:"Edit feedback,Leave feedback"}}{% endblock %}
+{% block content %}
+<h1>{{course.title}} — {{editing|yesno:"Edit your feedback,Leave feedback"}}</h1>
+
+<form method="post" style="max-width:600px">
+  {% csrf_token %}  
+  <input type="hidden" name="next" value="{{request.GET.next|default:request.META.HTTP_REFERER}}">
+  <p>
+    <label for="{{form.rating.id_for_label}}">Rating (1-5)</label><br>
+    {{form.rating}}
+    {% if form.rating.errors %}<div class="error">{{form.rating.errors}}</div>{% endif %}
+  </p>
+  <p>
+    <label for="{{form.comment.id_for_label}}">Comment (optional)</label><br>
+    {{form.comment}}
+    {% if form.comment.errors %}<div class="error">{{form.comment.errors}}</div>{% endif %}
+  </p>
+  <button type="submit">{{editing|yesno:"Update feedback,Submit feedback"}}</button>
+  <a href="{% url 'course_detail' course.id %}" style="margin-left:1rem">Cancel</a>
+</form>
+{% endblock %}

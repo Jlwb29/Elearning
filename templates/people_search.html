@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Search People{% endblock %}
+{% block content %}
+<h1>Search people</h1>
+<form method="get">
+  <input type="text" name="q" value="{{q}}" placeholder="Name/username/email">
+  <button type="submit">Search</button>
+</form>
+
+{% if teachers %}
+  <h2>Teachers</h2>
+  <ul>{% for u in teachers %}<li>{{u.get_full_name|default:u.username}}</li>{% endfor %}</ul>
+{% endif %}
+{% if students %}
+  <h2>Students</h2>
+  <ul>{% for u in students %}<li>{{u.get_full_name|default:u.username}}</li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}

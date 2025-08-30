@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Enroll in courses{% endblock %}
+{% block content %}
+<h1>Enroll in courses</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{form.non_field_errors}}
+  {% if form.courses.field.queryset %}
+    {{form.courses.errors}}
+    <ul>
+      {% for field in form.courses %}
+        <li>{{field.tag}} {{field.choice_label}}</li>
+      {% endfor %}
+    </ul>
+    <button type="submit">Enroll</button>
+  {% else %}
+    <p>You're already enrolled in all available courses</p>
+  {% endif %}
+</form>
+
+<p style="margin-top:1rem;">
+  <a href="{% url 'student_course_list' %}">My courses</a>
+</p>
+{% endblock %}

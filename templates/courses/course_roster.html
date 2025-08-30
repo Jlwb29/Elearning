@@ -1,0 +1,35 @@
+<ul class="roster">
+  {% for u in students %}
+    <li class="roster-item">
+      <strong>{{u.username}}</strong>
+      <ul>
+        <li>Name: {{u.get_full_name|default:"—"}}</li>
+        <li>Email: {{u.email|default:"—"}}</li>
+        <li>
+          Actions:
+          <ul class="actions">
+            <li>
+              <form method="post" action="{% url 'course_remove_student' course.id u.id %}"
+                    onsubmit="return confirm('Remove {{u.username}} from this course?');">
+                {% csrf_token %}
+                <button type="submit">Remove</button>
+              </form>
+            </li>
+            <li>
+              <form method="post" action="{% url 'course_block_student' course.id u.id %}"
+                    onsubmit="return confirm('Block {{u.username}} (and remove) from this course?');">
+                {% csrf_token %}
+                <input type="hidden" name="reason" value="Teacher action via roster">
+                <button type="submit">Block</button>
+              </form>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  {% empty %}
+    <li><em>No students enrolled yet.</em></li>
+  {% endfor %}
+</ul>
+
+

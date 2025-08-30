@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }} — Roster{% endblock %}
+{% block content %}
+<h1>{{course.title}}</h1>
+<p>
+  {% if course.start_date %}{{course.start_date}}{% if course.end_date %}-{{course.end_date}}{% endif %}{% endif %}
+  {% if course.capacity %} · Capacity: {{course.capacity}}{% endif %}
+</p>
+
+<h2>Enrolled Students</h2>
+{% if students %}
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead><tr><th>Username</th><th>Name</th><th>Email</th></tr></thead>
+    <tbody>
+      {% for u in students %}
+        <tr>
+          <td>{{u.username}}</td>
+          <td>{{u.get_full_name|default:"—"}}</td>
+          <td>{{u.email|default:"—"}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No students enrolled yet.</p>
+{% endif %}
+
+<h2>Student feedback</h2>
+
+{% if avg_rating %}
+  <p>Average rating: {{avg_rating|floatformat:1}} / 5 ({{feedbacks|length}} review{{feedbacks|length|pluralize}})</p>
+{% else %}
+  <p>No feedback yet.</p>
+{% endif %}
+
+<ul style="list-style:none;padding:0">
+  {% for f in feedbacks %}
+    <li style="margin:.5rem 0;padding:.5rem;border:1px solid #eee">
+      <strong>{{f.user.username}}</strong> — {{f.rating}}/5
+      <small style="opacity:.7;">· {{f.updated_at|date:"Y-m-d H:i"}}</small><br>
+      {% if f.comment %}{{f.comment}}{% else %}<em>(no comment)</em>{% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+{% if user.is_authenticated %}
+  {% if my_feedback %}
+    <p>Your feedback: {{my_feedback.rating}}/5
+       {% if my_feedback.comment %} — “{{my_feedback.comment}}”{% endif %}
+       <a href="{% url 'course_feedback' course.id %}">Edit</a>
+    </p>
+  {% elif perms.courses.view_course %}
+    {% comment %} Show button for enrolled students only in the detail template if you like {% endcomment %}
+    <p><a href="{% url 'course_feedback' course.id %}">Leave feedback</a></p>
+  {% endif %}
+{% endif %}
+
+
+<p style="margin-top:1rem;">
+  <a href="{% url 'teacher_course_list' %}">← Back to My Courses</a>
+</p>
+{% endblock %}
