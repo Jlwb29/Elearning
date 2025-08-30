@@ -18,7 +18,8 @@ INSTALLED_APPS = [
     "accounts",
     "courses.apps.CoursesConfig",   
     "channels",
-    "rtchat"
+    "rtchat",
+    "rest_framework"
 ]
 
 MEDIA_URL = "/media/"
