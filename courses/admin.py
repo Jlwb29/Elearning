@@ -9,7 +9,7 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(Enrollment)
 class EnrollmentAdmin(admin.ModelAdmin):
     list_display = ("user", "course", "role", "created_at")
-    list_filter = ("role")
+    list_filter = ("role",)
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
